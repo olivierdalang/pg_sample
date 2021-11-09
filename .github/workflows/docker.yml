@@ -9,6 +9,22 @@ on:
       - v*
 
 jobs:
+  testing:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Start test database in background
+        run: docker run --network=host -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+
+      - name: Build pgsample container
+        run: docker build -t pg_sample .
+
+      - name: Run tests
+        run: docker run --network=host -e PGHOST=postgres -e PGPORT=5432 -e PGUSER=postgres -e PGPASSWORD=postgres -e PGDATABASE=postgres --entrypoint=prove pg_sample
+
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
